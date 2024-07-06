@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-container-render {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    form {
+        width: 800px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+
+        input,
+        select,
+        textarea {
+            padding: 10px;
+            width: 400px;
+        }
+
+        .button{
+            margin-top: 2%;
+            padding: 10px 40px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #d8a504;
+        }
+
+
+    }
+
+
+}
