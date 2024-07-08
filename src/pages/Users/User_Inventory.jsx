@@ -7,15 +7,15 @@ const User_Inventory = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('https://api.tu-dominio.com/productos'); // Usa Aqui el endpoint
+      const response = await fetch('http://localhost:3000/api/inventario/'); // Usa Aqui el endpoint
       const data = await response.json();
       setRows(data.map((producto, index) => ({  //debe coincidir con la api 
-        id: index + 1,
+        id_inventario: index + 1,
+        tipo_producto:producto.tipo_producto,
         id_producto: producto.id_producto,
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        categoria: producto.categoria,
         cantidad: producto.cantidad,
+        descripcion: producto.descripcion
+
       })));
       setLoading(false);
     } catch (error) {
@@ -29,11 +29,11 @@ const User_Inventory = () => {
   }, []);
 
   const columns = [
-    { field: 'id_producto', headerName: 'ID Producto', width: 150 },
-    { field: 'nombre', headerName: 'Nombre', width: 200 },
-    { field: 'descripcion', headerName: 'Descripción', width: 250 },
-    { field: 'categoria', headerName: 'Categoría', width: 150 },
+    { field: 'id_inventario', headerName: 'ID Producto', width: 150 },
+    { field: 'tipo_producto', headerName: 'Nombre', width: 200 },
+    { field: 'id_producto', headerName: 'Descripción', width: 250 },
     { field: 'cantidad', headerName: 'Cantidad', width: 150 },
+    { field: 'descripcion', headerName: 'descripción', width: 150 },
     { field: 'actions', headerName: 'Acciones', width: 150 },
   ];
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {useNavigate} from 'react-router-dom';
 import '../../src/styles/Login.scss'
-import authServices from "./authServices";
-
+//import authServices from "./authServices";
+import axios from "axios";
 
 
 const Login=({onLogin})=>{
@@ -11,7 +11,7 @@ const Login=({onLogin})=>{
 
     const navigate = useNavigate();
 
-
+/*
     //este metodo aun no esta siendo usada pero servira para actualizar el estado del componente 
     const handleLogin = async(e) =>{
         e.preventDefault();
@@ -25,8 +25,7 @@ const Login=({onLogin})=>{
             console.error('Registro fallido' , error)
         }
     }    
-
-
+*/
     const handleSubmit = (e)=>{
         e.preventDefault();
 
@@ -40,16 +39,18 @@ const Login=({onLogin})=>{
             alert('Credenciales incorrectas')
         }
 
-
+        
 
     }
+
+
 
 
     return(
         <div className="login-container">
             <div className="logo-view"></div>
             <form onSubmit={handleSubmit}>
-                <h2>Iniciar Secion</h2>
+                <h2>Iniciar Sesión</h2>
                 <input type="text" placeholder="Usuario" value={username} onChange={(e) =>setUsername(e.target.value)}/>
                 <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)}/>
                 <button type="submit">Login</button>
