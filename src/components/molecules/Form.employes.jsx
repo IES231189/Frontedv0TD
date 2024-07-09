@@ -1,38 +1,53 @@
-import { useState } from "react";
-import '../../styles/employes.scss'
+import React, { useState } from "react";
+import '../../styles/employes.scss';
 
 const FormularioEmployes = () => {
     // Definir los estados para cada campo del formulario
+    const [idEmpleado, setIdEmpleado] = useState('');
     const [nombre, setNombre] = useState('');
+    const [apellidos, setApellidos] = useState('');
     const [email, setEmail] = useState('');
     const [telefono, setTelefono] = useState('');
-    const [tipo, setTipo] = useState('');
-    const [fechaIngreso, setFechaIngreso] = useState('');
-    const [areaLaboral, setAreaLaboral] = useState('');
-    const [salario, setSalario] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí puedes manejar la lógica de envío del formulario
-        // Por ejemplo, puedes enviar los datos a una API o realizar alguna acción con ellos.
-        console.log({
-            nombre,
-            email,
-            telefono,
-            tipo,
-            fechaIngreso,
-            areaLaboral,
-            salario
-        });
-        alert('Empleado agregado correctamente');
-        // Opcional: resetear los campos del formulario
-        setNombre('');
-        setEmail('');
-        setTelefono('');
-        setTipo('');
-        setFechaIngreso('');
-        setAreaLaboral('');
-        setSalario('');
+
+        const empleado = {
+            id_empleado: idEmpleado,
+            nombre: nombre,
+            apellidos: apellidos,
+            email: email,
+            telefono: telefono
+        };
+
+        try {
+            const response = await fetch('http://localhost:3000/api/empleados/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(empleado)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al agregar el empleado');
+            }
+
+            const result = await response.text(); // Leer la respuesta como texto
+
+            // Mostrar mensaje de alerta basado en la respuesta del servidor
+            alert(result);
+
+            // Opcional: resetear los campos del formulario
+            setIdEmpleado('');
+            setNombre('');
+            setApellidos('');
+            setEmail('');
+            setTelefono('');
+        } catch (error) {
+            console.error('Hubo un problema al agregar el empleado:', error.message);
+            alert('Hubo un problema al agregar el empleado');
+        }
     };
 
     return (
@@ -40,11 +55,29 @@ const FormularioEmployes = () => {
             <p> Datos básicos</p>
             <form onSubmit={handleSubmit}>
                 <div className="form-group-employes">
-                    <label>Nombre Completo</label>
+                    <label>ID Empleado</label>
+                    <input 
+                        type="text" 
+                        value={idEmpleado} 
+                        onChange={(e) => setIdEmpleado(e.target.value)} 
+                        required 
+                    />
+                </div>
+                <div className="form-group-employes">
+                    <label>Nombre</label>
                     <input 
                         type="text" 
                         value={nombre} 
                         onChange={(e) => setNombre(e.target.value)} 
+                        required 
+                    />
+                </div>
+                <div className="form-group-employes">
+                    <label>Apellidos</label>
+                    <input 
+                        type="text" 
+                        value={apellidos} 
+                        onChange={(e) => setApellidos(e.target.value)} 
                         required 
                     />
                 </div>
@@ -55,7 +88,6 @@ const FormularioEmployes = () => {
                             type="email" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)} 
-                            required 
                         />
                     </div>
                     <div className="form-group-employes">
@@ -64,58 +96,12 @@ const FormularioEmployes = () => {
                             type="tel" 
                             value={telefono} 
                             onChange={(e) => setTelefono(e.target.value)} 
-                            required 
                         />
                     </div>
                 </div>
-
-                <div className="form-group-employes">
-                    <label>Tipo de Empleado</label>
-                    <select 
-                        name="tipo" 
-                        value={tipo} 
-                        onChange={(e) => setTipo(e.target.value)} 
-                        required
-                    >
-                        <option value="">Seleccione un tipo</option>
-                        <option value="tipo1">Tipo 1</option>
-                        <option value="tipo2">Tipo 2</option>
-                    </select>
-                </div>
-
-                <p>Datos del Empleado</p>
-                <div className="content-section-form">
-                    <div className="form-group-employes">
-                        <label>Fecha de Ingreso</label>
-                        <input 
-                            type="date" 
-                            value={fechaIngreso} 
-                            onChange={(e) => setFechaIngreso(e.target.value)} 
-                        />
-                    </div>
-
-                    <div className="form-group-employes">
-                        <label>Área Laboral</label>
-                        <input 
-                            type="text" 
-                            value={areaLaboral} 
-                            onChange={(e) => setAreaLaboral(e.target.value)} 
-                        />
-                    </div>
-                </div>
-
-                <div className="form-group-employes">
-                    <label>Salario</label><br/>
-                    <input 
-                        type="text" 
-                        value={salario} 
-                        onChange={(e) => setSalario(e.target.value)} 
-                    />
-                </div>
-                 <div className="contain-button">
+                <div className="contain-button">
                     <button type="submit" className="button">Agregar</button>
-                 </div>
-                
+                </div>
             </form>
         </div>
     );
