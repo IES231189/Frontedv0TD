@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
@@ -6,6 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
+
 
 const StyledDataGrid = styled(DataGrid)({
   '& .MuiDataGrid-cell': {
@@ -22,10 +22,10 @@ const DataTable = ({ columns, rows, pageSize, onEdit, onDelete }) => {
         ...col,
         renderCell: (params) => (
           <div>
-            <IconButton color="primary" aria-label="edit" onClick={() => onEdit(params.row.id)}>
+            <IconButton color="primary" aria-label="edit" onClick={() => onEdit(params.row)}>
               <EditIcon />
             </IconButton>
-            <IconButton color="secondary" aria-label="delete" onClick={() => onDelete(params.row.id)}>
+            <IconButton color="secondary" aria-label="delete" onClick={() => onDelete(params.row.id_inventario)}>
               <DeleteIcon />
             </IconButton>
           </div>
@@ -36,8 +36,7 @@ const DataTable = ({ columns, rows, pageSize, onEdit, onDelete }) => {
   });
 
   return (
-    
-    <div style={{ height: 200, width: '100%' }}>
+    <div style={{ height: 400, width: '1400px',position:'relative',left:'200px'}}>
       <StyledDataGrid
         rows={rows}
         columns={defaultColumns}

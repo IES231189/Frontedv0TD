@@ -7,15 +7,27 @@ const EmployesTables = () => {
   const [loadingEmployees, setLoadingEmployees] = useState(true);
   const [loadingWorkDays, setLoadingWorkDays] = useState(true);
 
+  // Obtén el token del localStorage
+  const token = localStorage.getItem('authToken');
+
   // Función para obtener datos de empleados
   const fetchEmployees = async () => {
     try {
-      const response = await fetch('https://api.tu-dominio.com/empleados'); // URL de la API para empleados
-      const data = await response.json();
-      setEmployeeRows(data);
-      setLoadingEmployees(false);
+      const response = await fetch('http://localhost:3000/api/empleado/', {
+        headers: {
+          'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setEmployeeRows(data);
+      } else {
+        console.error('Error fetching employee data:', response.statusText);
+      }
     } catch (error) {
       console.error('Error fetching employee data:', error);
+    } finally {
       setLoadingEmployees(false);
     }
   };
@@ -23,12 +35,21 @@ const EmployesTables = () => {
   // Función para obtener datos de días laborados
   const fetchWorkDays = async () => {
     try {
-      const response = await fetch('https://api.tu-dominio.com/dias-laborados'); // URL de la API para días laborados
-      const data = await response.json();
-      setWorkDaysRows(data);
-      setLoadingWorkDays(false);
+      const response = await fetch('http://localhost:3000/api/diasLaborados/', {
+        headers: {
+           'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setWorkDaysRows(data);
+      } else {
+        console.error('Error fetching work days data:', response.statusText);
+      }
     } catch (error) {
       console.error('Error fetching work days data:', error);
+    } finally {
       setLoadingWorkDays(false);
     }
   };
@@ -39,10 +60,17 @@ const EmployesTables = () => {
   }, []);
 
   const employeeColumns = [
-    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'id_empleado', headerName: 'ID', width: 90 },
+    { field: 'id_usuario', headerName: 'ID Usuario', width: 150 },
     { field: 'nombre', headerName: 'Nombre', width: 150 },
-    { field: 'correo', headerName: 'Correo Electrónico', width: 200 },
-    { field: 'tipo', headerName: 'Tipo', width: 130 },
+    { field: 'apellidos', headerName: 'Apellidos', width: 200 },
+    { field: 'estado_civil', headerName: 'Estado Civil', width: 150 },
+    { field: 'edad', headerName: 'Edad', width: 100 },
+    { field: 'sexo', headerName: 'Sexo', width: 100 },
+    { field: 'email', headerName: 'Correo Electrónico', width: 200 },
+    { field: 'telefono', headerName: 'Teléfono', width: 150 },
+    { field: 'fecha_ingreso', headerName: 'Fecha de Ingreso', width: 150 },
+    { field: 'sueldo_semanal', headerName: 'Sueldo Semanal', width: 150 },
     {
       field: 'actions',
       headerName: 'Acciones',
@@ -53,10 +81,9 @@ const EmployesTables = () => {
   ];
 
   const workDaysColumns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'nombreEmpleado', headerName: 'Nombre del Empleado', width: 200 },
+    { field: 'id_dia_laborado', headerName: 'ID', width: 90 },
+    { field: 'id_empleado', headerName: 'ID Empleado', width: 150 },
     { field: 'fecha', headerName: 'Fecha', width: 150 },
-    { field: 'hora', headerName: 'Hora', width: 100 },
     { field: 'estado', headerName: 'Estado', width: 130 },
     {
       field: 'actions',
@@ -72,13 +99,22 @@ const EmployesTables = () => {
     // Lógica para la edición
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, type) => {
     console.log('Delete item with id:', id);
     try {
-      await fetch(`https://api.tu-dominio.com/items/${id}`, { method: 'DELETE' });
-      //filtrar
-      setEmployeeRows(employeeRows.filter((row) => row.id !== id));
-      setWorkDaysRows(workDaysRows.filter((row) => row.id !== id));
+      const endpoint = type === 'employee' ? `/api/empleado/${id}` : `/api/diasLaborados/${id}`;
+      await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (type === 'employee') {
+        setEmployeeRows(employeeRows.filter((row) => row.id_empleado !== id));
+      } else {
+        setWorkDaysRows(workDaysRows.filter((row) => row.id_dia_laborado !== id));
+      }
     } catch (error) {
       console.error('Error deleting data:', error);
     }
@@ -96,7 +132,7 @@ const EmployesTables = () => {
             rows={employeeRows}
             pageSize={5}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={(id) => handleDelete(id, 'employee')}
           />
         )}
       </div>
@@ -111,7 +147,7 @@ const EmployesTables = () => {
             rows={workDaysRows}
             pageSize={5}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={(id) => handleDelete(id, 'workDay')}
           />
         )}
       </div>
