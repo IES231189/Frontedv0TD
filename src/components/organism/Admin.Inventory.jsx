@@ -1,86 +1,150 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from '../atoms/Table';
+import '../../styles/user.Cash.scss';
 
 const AdminDataInventory = () => {
-  const [rows, setRows] = useState([]);
+  const [maquinariaRows, setMaquinariaRows] = useState([]);
+  const [materiaPrimaRows, setMateriaPrimaRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
   const [formData, setFormData] = useState({
-    tipo_producto: '',
-    id_producto: '',
-    cantidad: '',
+    id_maquinaria: '',
+    nombre: '',
     descripcion: '',
+    cantidad: '',
+    unidad: '',
   });
 
-  const fetchProducts = async () => {
+  const fetchMaquinaria = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/inventario/');
+      const response = await fetch('http://localhost:3000/api/maquinaria/verMaquinar', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setRows(data.map((producto) => ({
-        id: producto.id_inventario, // Usar id_inventario como id único
-        id_inventario: producto.id_inventario,
-        tipo_producto: producto.tipo_producto,
-        id_producto: producto.id_producto,
-        cantidad: producto.cantidad,
-        descripcion: producto.descripcion,
+      setMaquinariaRows(data.map((maquinaria) => ({
+        id: maquinaria.id_maquinaria,
+        id_maquinaria: maquinaria.id_maquinaria,
+        nombre: maquinaria.nombre,
+        descripcion: maquinaria.descripcion,
+        cantidad: maquinaria.cantidad,
       })));
-      setLoading(false);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Error fetching data');
+      console.error('Error fetching maquinaria data:', error);
+      setError('Error fetching maquinaria data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMateriaPrima = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/materiaPrima/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setMateriaPrimaRows(data.map((materiaPrima) => ({
+        id: materiaPrima.id_materia_prima,
+        id_materia_prima: materiaPrima.id_materia_prima,
+        nombre: materiaPrima.nombre,
+        descripcion: materiaPrima.descripcion,
+        cantidad: materiaPrima.cantidad,
+        unidad: materiaPrima.unidad,
+      })));
+    } catch (error) {
+      console.error('Error fetching materia prima data:', error);
+      setError('Error fetching materia prima data');
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchMaquinaria();
+    fetchMateriaPrima();
   }, []);
 
   const handleEdit = (row) => {
     setEditingRow(row);
     setFormData({
-      tipo_producto: row.tipo_producto,
-      id_producto: row.id_producto,
-      cantidad: row.cantidad,
-      descripcion: row.descripcion,
+      id_maquinaria: row.id_maquinaria || '',
+      nombre: row.nombre || '',
+      descripcion: row.descripcion || '',
+      cantidad: row.cantidad || '',
+      unidad: row.unidad || '',
     });
   };
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/inventario/${editingRow.id_inventario}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = editingRow.id_maquinaria 
+        ? await fetch(`http://localhost:3000/api/maquinaria/${editingRow.id_maquinaria}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(formData),
+          })
+        : await fetch('http://localhost:3000/api/maquinaria/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(formData),
+          });
+
       if (!response.ok) {
         const text = await response.text();
         throw new Error(`Network response was not ok: ${text}`);
       }
       const updatedProduct = await response.json();
-      setRows(rows.map((row) => (row.id_inventario === editingRow.id_inventario ? { ...row, ...formData } : row)));
+
+      if (editingRow.id_maquinaria) {
+        setMaquinariaRows(maquinariaRows.map((row) => (row.id_maquinaria === editingRow.id_maquinaria ? { ...row, ...formData } : row)));
+      } else {
+        setMaquinariaRows([...maquinariaRows, updatedProduct]);
+      }
+
       setEditingRow(null);
+      setFormData({
+        id_maquinaria: '',
+        nombre: '',
+        descripcion: '',
+        cantidad: '',
+        unidad: '',
+      });
     } catch (error) {
       console.error('Error updating data:', error);
       setError('Error updating data');
     }
   };
 
-  const handleDelete = async (id_inventario) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+  const handleDelete = async (id_maquinaria) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este elemento?')) {
       try {
-        const response = await fetch(`http://localhost:3000/api/inventario/${id_inventario}`, { method: 'DELETE' });
+        const response = await fetch(`http://localhost:3000/api/maquinaria/${id_maquinaria}`, { 
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Network response was not ok: ${text}`);
         }
-        setRows(rows.filter((row) => row.id_inventario !== id_inventario));
+        setMaquinariaRows(maquinariaRows.filter((row) => row.id_maquinaria !== id_maquinaria));
       } catch (error) {
         console.error('Error deleting data:', error);
         setError('Error deleting data');
@@ -88,12 +152,16 @@ const AdminDataInventory = () => {
     }
   };
 
-  const columns = [
-    { field: 'id_inventario', headerName: 'ID Producto', width: 150 },
-    { field: 'tipo_producto', headerName: 'Nombre', width: 200 },
-    { field: 'id_producto', headerName: 'ID Producto', width: 150 },
-    { field: 'cantidad', headerName: 'Cantidad', width: 150 },
+  const handleAdd = async () => {
+    // Similar to handleSave, but will be triggered when a new product is being added
+    await handleSave();
+  };
+
+  const columnsMaquinaria = [
+    { field: 'id_maquinaria', headerName: 'ID Maquinaria', width: 150 },
+    { field: 'nombre', headerName: 'Nombre', width: 200 },
     { field: 'descripcion', headerName: 'Descripción', width: 250 },
+    { field: 'cantidad', headerName: 'Cantidad', width: 150 },
     {
       field: 'actions',
       headerName: 'Acciones',
@@ -101,10 +169,18 @@ const AdminDataInventory = () => {
       renderCell: (params) => (
         <>
           <button onClick={() => handleEdit(params.row)}>Editar</button>
-          <button onClick={() => handleDelete(params.row.id_inventario)}>Eliminar</button>
+          <button onClick={() => handleDelete(params.row.id_maquinaria)}>Eliminar</button>
         </>
       ),
     },
+  ];
+
+  const columnsMateriaPrima = [
+    { field: 'id_materia_prima', headerName: 'ID Materia Prima', width: 150 },
+    { field: 'nombre', headerName: 'Nombre', width: 200 },
+    { field: 'descripcion', headerName: 'Descripción', width: 250 },
+    { field: 'cantidad', headerName: 'Cantidad', width: 150 },
+    { field: 'unidad', headerName: 'Unidad', width: 150 },
   ];
 
   return (
@@ -116,46 +192,48 @@ const AdminDataInventory = () => {
         <p>{error}</p>
       ) : (
         <>
+          <h4>Maquinaria</h4>
           <DataTable
-            columns={columns}
-            rows={rows}
+            columns={columnsMaquinaria}
+            rows={maquinariaRows}
             pageSize={5}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
           />
-          {editingRow && (
-            <div>
-              <h4>Editar Producto</h4>
-              <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                <input
-                  type='text'
-                  value={formData.tipo_producto}
-                  onChange={(e) => setFormData({ ...formData, tipo_producto: e.target.value })}
-                  placeholder='Tipo de Producto'
-                />
-                <input
-                  type='text'
-                  value={formData.id_producto}
-                  onChange={(e) => setFormData({ ...formData, id_producto: e.target.value })}
-                  placeholder='ID Producto'
-                />
-                <input
-                  type='number'
-                  value={formData.cantidad}
-                  onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
-                  placeholder='Cantidad'
-                />
-                <input
-                  type='text'
-                  value={formData.descripcion}
-                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                  placeholder='Descripción'
-                />
-                <button type='submit'>Guardar</button>
-                <button onClick={() => setEditingRow(null)}>Cancelar</button>
-              </form>
-            </div>
-          )}
+          <h4>Materia Prima</h4>
+          <DataTable
+            columns={columnsMateriaPrima}
+            rows={materiaPrimaRows}
+            pageSize={5}
+          />
+          <div>
+            <h4>{editingRow ? 'Editar' : 'Agregar'} Elemento</h4>
+            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+              <input
+                type='text'
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                placeholder='Nombre'
+              />
+              <input
+                type='text'
+                value={formData.descripcion}
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                placeholder='Descripción'
+              />
+              <input
+                type='number'
+                value={formData.cantidad}
+                onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
+                placeholder='Cantidad'
+              />
+              <input
+                type='text'
+                value={formData.unidad}
+                onChange={(e) => setFormData({ ...formData, unidad: e.target.value })}
+                placeholder='Unidad'
+              />
+              <button type='submit'>{editingRow ? 'Guardar Cambios' : 'Agregar Elemento'}</button>
+            </form>
+          </div>
         </>
       )}
     </div>

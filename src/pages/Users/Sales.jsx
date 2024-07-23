@@ -56,7 +56,7 @@ const Sales = () => {
 
       console.log('Venta registrada con éxito');
     } catch (error) {
-      console.error('Error registrando la venta:', error);
+      console.log('ror registrando la venta:', error);
     }
   };
 

@@ -36,7 +36,7 @@ const DataTable = ({ columns, rows, pageSize, onEdit, onDelete }) => {
   });
 
   return (
-    <div style={{ height: 400, width: '1100px' }}>
+    <div style={{ height: 400, width: '1400px',position:'relative',left:'200px'}}>
       <StyledDataGrid
         rows={rows}
         columns={defaultColumns}

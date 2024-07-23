@@ -1,14 +1,26 @@
-import axios from 'axios';
+const API_URL = 'http://localhost:3000/api/usuarios';
 
+const login = async (email, pass) => {
+  const response = await fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, pass }),
+  });
 
-const API_URL = 'http://localhost:3000';
-
-const login = async (username, password) => {
-  const response = await axios.post(`${API_URL}/login`, { username, password });
-  if (response.data.token) {
-    localStorage.setItem('user', JSON.stringify(response.data));
+  if (!response.ok) {
+    throw new Error('Error en la solicitud de inicio de sesión');
   }
-  return response.data;
+
+  const data = await response.json();
+
+  if (data.token) {
+    localStorage.setItem('user', JSON.stringify(data));
+  }
+  
+  
+  return data;
 };
 
 const logout = () => {
